@@ -15,41 +15,44 @@ import ConfirmModal from '../ConfirmBox';
 
 import { Row, Col, Modal } from 'react-bootstrap';
 
+import { downloadFile } from "../../utils/files"
+
 import './MainScreen.css';
 
-function DarkModeSettingsPopup({ show, handleClose, globalThemeDark, editorThemeDark, setGlobalTheme, setEditorTheme }) {
+function DarkModeSettingsPopup({ show, handleClose, DarkTheme, docUrl }) {
     return (
         <Modal show={show} onHide={handleClose}>
             <DarkModeSettings
-                globalThemeDark={globalThemeDark}
-                editorThemeDark={editorThemeDark}
-                setGlobalTheme={setGlobalTheme}
-                setEditorTheme={setEditorTheme}
+                DarkTheme={DarkTheme}
             />
         </Modal>
     );
 }
 
-const MainScreen = ({ colSize = 10, globalThemeDark=false, editorThemeDark=false, setGlobalTheme, setEditorTheme }) => {
+const MainScreen = ({
+    colSize = 10,
+    DarkTheme,
+    IDEVars
+}) => {
     // Dark Mode Settings Popup Modal Configuration
     const [darkModeSettingsPopup, setShowDarkModeSettingsPopup] = useState(false);
     const handleOpenDarkModeSettings = () => setShowDarkModeSettingsPopup(true);
     const handleCloseDarkModeSettings = () => setShowDarkModeSettingsPopup(false);
 
     // Share Link Popup Modal Configuration
-    const [shareLink, setShareLink] = useState("http://192.168.1.10/join?id=waeiofjnsdkjbuaoadgjcvnoakkpowekj132r2kjkoj24ho2")
+    // const [shareLink, setShareLink] = useState(document.location.href);
+    const shareLink = document.location.href;
     const [shareLinkPopup, setShowShareLinkPopup] = useState(false);
     const handleOpenShareLink = () => setShowShareLinkPopup(true);
     const handleCloseShareLink = () => setShowShareLinkPopup(false);
 
-    const [code, setCode] = useState('print("Hello World !")');
-    const handleEditorChange = (value) => {
-        setCode(value);
-    };
-
-    const [showConfirm, setShowConfirm] = useState(false);
+    const [showConfirmSave, setShowConfirmSave] = useState(false);
     const handleSave = () => {
-        console.log("File saved ✅");
+        console.log(`File ${IDEVars.fileName.value} saved ✅`);
+        downloadFile({
+            fileName: IDEVars.fileName.value,
+            fileContent: IDEVars.editorContent.value
+        });
     };
 
     return (
@@ -58,12 +61,16 @@ const MainScreen = ({ colSize = 10, globalThemeDark=false, editorThemeDark=false
                 <Header
                     handleOpenDarkModeSettings={handleOpenDarkModeSettings}
                     handleOpenShareLink={handleOpenShareLink}
-                    handleFileSave={() => setShowConfirm(true)}
-                    globalThemeDark={globalThemeDark}
+                    handleFileSave={() => setShowConfirmSave(true)}
+                    globalThemeDark={DarkTheme.global.value}
+                    IDEVars={IDEVars}
                 />
             </Row>
             <Row style={{ height: "60vh", paddingTop: "1vh" }}>
-                <CodeEditor language='python' value={code} onChange={handleEditorChange} editorThemeDark={editorThemeDark}/>
+                <CodeEditor
+                    editorThemeDark={DarkTheme.editor.value}
+                    IDEVars={IDEVars}
+                />
             </Row>
             <Row style={{ borderTop: "1px solid black", height: "90%", maxHeight: "33vh" }}>
                 <OutputArea value='coolness is within us' />
@@ -72,10 +79,7 @@ const MainScreen = ({ colSize = 10, globalThemeDark=false, editorThemeDark=false
             <DarkModeSettingsPopup
                 show={darkModeSettingsPopup}
                 handleClose={handleCloseDarkModeSettings}
-                globalThemeDark={globalThemeDark}
-                editorThemeDark={editorThemeDark}
-                setGlobalTheme={setGlobalTheme}
-                setEditorTheme={setEditorTheme}
+                DarkTheme={DarkTheme}
             />
             <LinkPopup
                 show={shareLinkPopup}
@@ -83,8 +87,8 @@ const MainScreen = ({ colSize = 10, globalThemeDark=false, editorThemeDark=false
                 link={shareLink}
             />
             <ConfirmModal
-                show={showConfirm}
-                onClose={() => setShowConfirm(false)}
+                show={showConfirmSave}
+                onClose={() => setShowConfirmSave(false)}
                 onConfirm={handleSave}
                 title="Save Changes?"
                 message="This will overwrite the current file. Are you sure you want to continue?"

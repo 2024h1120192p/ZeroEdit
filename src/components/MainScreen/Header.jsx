@@ -2,13 +2,20 @@
 
 import React, { useState } from 'react';
 
-const Header = ({ 
-    handleOpenDarkModeSettings, 
-    handleOpenShareLink = (() => console.log("Open popup of Share link")), 
+import { useDocument } from '@automerge/automerge-repo-react-hooks';
+import { updateText } from '@automerge/automerge/next';
+
+const Header = ({
+    handleOpenDarkModeSettings,
+    handleOpenShareLink,
     handleFileSave,
-    globalThemeDark=true
+    globalThemeDark,
+    IDEVars
 }) => {
-    const [fileName, setFileName] = useState('untitled.txt');
+    // const setFileName = (e) => {
+    //     console.log(e.target.value);
+    //     IDEVars.fileName.set(e.target.value); 
+    // }
 
     return (
         <div id="Main-Screen-Header" className='d-flex align-items-center w-100 border-bottom'>
@@ -21,8 +28,8 @@ const Header = ({
                 <input
                     type="text"
                     placeholder="Enter file name"
-                    value={fileName}
-                    onChange={(e) => setFileName(e.target.value)}
+                    value={IDEVars.fileName.value}
+                    onChange={(e) => IDEVars.fileName.set(e.target.value)}
                     style={{ padding: '5px', fontSize: '14px' }}
                 />
                 &nbsp;
